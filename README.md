@@ -81,7 +81,7 @@ Tested against prompt injection ("ignore previous instructions...") and social-e
 
 ## Notes / Known Limitations
 
-- LDAP authentication runs unencrypted (port 389) rather than LDAPS, due to a Windows Server 2025 LDAP-signing enforcement change encountered during development. LDAPS remains a documented hardening opportunity.
+- LDAPS is fully implemented: an Enterprise Root CA runs on the domain controller (AD CS), issuing a certificate the DC uses for LDAPS (port 636). The application container trusts this CA at build time and authenticates over encrypted LDAP exclusively — no credentials ever traverse the network in plaintext.
 - The GitHub webhook is tunneled via Cloudflare Tunnel (`cloudflared`) for local development; a production deployment would use a static public endpoint instead.
 - The Ollama hint bot occasionally exceeds intended tier-1 vagueness (naming a technique earlier than intended) — a known tradeoff of running a smaller local model versus a larger hosted one.
 

@@ -8,9 +8,9 @@ class Config:
     )
 
     # LDAP settings
-    LDAP_HOST = '192.168.151.10'
-    LDAP_PORT = 389
-    LDAP_USE_SSL = False
+    LDAP_HOST = 'WIN-DC01.ctf.local'
+    LDAP_PORT = 636
+    LDAP_USE_SSL = True
     LDAP_BASE_DN = 'dc=ctf,dc=local'
     LDAP_USER_DN = 'CTF-Users'
     LDAP_GROUP_DN = 'Groups'
