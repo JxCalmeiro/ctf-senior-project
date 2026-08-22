@@ -46,7 +46,7 @@ def get_hint():
             "prompt": prompt,
             "stream": False,
             "options": {"temperature": 0.4}
-        }, timeout=30)
+        }, timeout=90)
         response.raise_for_status()
         hint_text = response.json()["response"]
     except requests.exceptions.RequestException as e:

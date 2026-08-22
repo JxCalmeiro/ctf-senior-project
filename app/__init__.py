@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from app.models import db
 from config import Config
 
@@ -7,6 +7,10 @@ def create_app():
     app.config.from_object(Config)
 
     db.init_app(app)
+
+    @app.route('/')
+    def index():
+        return render_template('index.html')
 
     from app.auth import auth_bp
     app.register_blueprint(auth_bp)
