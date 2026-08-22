@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CASE FILES // CTF Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --paper: #e6dabd;
+    --paper-dark: #d9c9a1;
+    --paper-darker: #c9b688;
+    --ink: #26201a;
+    --ink-soft: #5c5142;
+    --stamp-red: #9c2b2b;
+    --stamp-green: #3d5c3d;
+    --thread-crypto: #2e4b6e;
+    --thread-forensics: #9c2b2b;
+    --thread-web: #5b3a6e;
+    --line: #a9976b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0,0,0,0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(0,0,0,0.03) 0%, transparent 40%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, transparent 1px, transparent 2px, rgba(0,0,0,0.015) 3px);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .stamp-font { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.06em; }
+  .type-font { font-family: 'Special Elite', 'JetBrains Mono', monospace; }
+
+  /* ---------- shared bits ---------- */
+  .paper-card {
+    background: var(--paper-dark);
+    border: 1px solid var(--line);
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.08), inset 0 0 40px rgba(0,0,0,0.03);
+    position: relative;
+  }
+  .paper-card::before {
+    content: "";
+    position: absolute; inset: 6px;
+    border: 1px dashed rgba(0,0,0,0.15);
+    pointer-events: none;
+  }
+  .torn-edge {
+    height: 8px;
+    background-image: linear-gradient(135deg, var(--paper-dark) 25%, transparent 25%),
+                       linear-gradient(225deg, var(--paper-dark) 25%, transparent 25%);
+    background-size: 10px 10px;
+    background-position: bottom;
+  }
+
+  .stamp {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.12em;
+    padding: 3px 12px;
+    border: 3px double currentColor;
+    border-radius: 4px;
+    transform: rotate(-6deg);
+    font-size: 0.85rem;
+    opacity: 0.9;
+    background: transparent;
+  }
+  .stamp-classified { color: var(--stamp-red); }
+  .stamp-solved { color: var(--stamp-green); }
+
+  .thread-crypto { border-left: 6px solid var(--thread-crypto); }
+  .thread-forensics { border-left: 6px solid var(--thread-forensics); }
+  .thread-web { border-left: 6px solid var(--thread-web); }
+
+  .btn-stamp {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.1em;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  .btn-stamp:hover { background: var(--stamp-red); transform: translateY(-1px); }
+  .btn-stamp:active { transform: translateY(1px); }
+
+  .btn-outline {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.1em;
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    padding: 9px 22px;
+    cursor: pointer;
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+
+  input.field {
+    background: rgba(255,255,255,0.35);
+    border: none;
+    border-bottom: 2px solid var(--ink-soft);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 8px 4px;
+    width: 100%;
+    outline: none;
+  }
+  input.field:focus { border-bottom-color: var(--stamp-red); }
+  input.field::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+  .redact { background: var(--ink); color: var(--ink); border-radius: 2px; padding: 0 4px; }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+  .hidden { display: none !important; }
+
+  .fade-in { animation: fadeIn 0.35s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- layout fallbacks (don't depend on Tailwind CDN) ---------- */
+  .center-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .dash-wrap { max-width: 1152px; margin: 0 auto; padding: 40px 24px; }
+  .row-between { display: flex; justify-content: space-between; align-items: flex-end; }
+  .dash-grid { display: flex; gap: 32px; align-items: flex-start; }
+  .dash-grid > div:first-child { flex: 2; min-width: 0; }
+  .dash-grid > div:last-child { flex: 1; min-width: 260px; }
+  @media (max-width: 800px) { .dash-grid { flex-direction: column; } }
+  .stack-5 > * + * { margin-top: 20px; }
+  .stack-1 > * + * { margin-top: 4px; }
+  .modal-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 50; }
+  .card-inner-1 { position: relative; padding: 18px 22px; cursor: pointer; }
+  .flex-start-between { display: flex; justify-content: space-between; align-items: flex-start; }
+  .text-right { text-align: right; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ================= LOGIN ================= -->
+<div id="login-view" class="center-screen">
+  <div class="paper-card fade-in" style="max-width: 420px; width: 100%; padding: 44px 36px 36px; position: relative;">
+    <div style="position:absolute; top:14px; right:18px;" class="stamp stamp-classified" style="transform: rotate(8deg);">TOP SECRET</div>
+
+    <p class="type-font" style="color: var(--ink-soft); font-size: 0.8rem; margin: 0 0 4px;">OPERATION FILE // ctf.local</p>
+    <h1 class="stamp-font" style="font-size: 2.6rem; line-height: 1; margin: 0 0 6px; color: var(--ink);">CASE FILES</h1>
+    <div style="height: 2px; background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 10px); margin-bottom: 18px;"></div>
+    <p class="type-font" style="font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 26px;">Clearance required. Enter your domain credentials to access the archive.</p>
+
+    <label class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); display:block; margin-bottom:4px;">AGENT ID</label>
+    <input id="username" class="field" style="margin-bottom: 18px;" placeholder="username">
+
+    <label class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); display:block; margin-bottom:4px;">PASSPHRASE</label>
+    <input id="password" type="password" class="field" style="margin-bottom: 26px;" placeholder="••••••••">
+
+    <button onclick="login()" class="btn-stamp" style="width: 100%; font-size: 1.1rem;">REQUEST ACCESS</button>
+    <p id="login-error" class="type-font hidden" style="color: var(--stamp-red); font-size: 0.85rem; margin-top: 14px;"></p>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard-view" class="hidden dash-wrap">
+  <div class="row-between" style="border-bottom: 3px double var(--ink); padding-bottom: 14px; margin-bottom: 30px;">
+    <div>
+      <p class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); margin:0;">ARCHIVE ACCESS GRANTED</p>
+      <h1 class="stamp-font" style="font-size: 2.4rem; line-height: 1; margin:0;">CASE FILES</h1>
+    </div>
+    <div class="text-right">
+      <p class="type-font" style="font-size: 0.85rem; margin:0 0 6px;">AGENT: <span id="welcome-user" style="font-weight:bold;"></span></p>
+      <button onclick="logout()" class="btn-outline" style="font-size: 0.8rem; padding: 5px 14px;">END SESSION</button>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <p class="stamp-font" style="font-size:1.3rem; letter-spacing:0.08em; margin: 0 0 14px; color: var(--ink-soft);">OPEN CASES</p>
+      <div id="challenges-list" class="stack-5"></div>
+    </div>
+
+    <div>
+      <p class="stamp-font" style="font-size:1.3rem; letter-spacing:0.08em; margin: 0 0 14px; color: var(--ink-soft);">FIELD RANKINGS</p>
+      <div class="paper-card" style="padding: 18px 20px; position: relative;">
+        <div id="leaderboard-list" class="stack-1"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHALLENGE MODAL ================= -->
+<div id="challenge-modal" class="hidden modal-overlay" style="background: rgba(20,16,12,0.72);">
+  <div class="paper-card fade-in" style="max-width: 560px; width: 100%; padding: 34px 32px; max-height: 88vh; overflow-y: auto; position: relative;">
+    <p id="modal-case-no" class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); margin: 0 0 2px;"></p>
+    <h3 id="modal-title" class="stamp-font" style="font-size: 1.9rem; line-height:1.05; margin: 0 0 14px;"></h3>
+    <p id="modal-desc" class="type-font" style="color: var(--ink); font-size: 0.92rem; line-height: 1.5; margin-bottom: 22px;"></p>
+
+    <label class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); display:block; margin-bottom:4px;">SUBMIT FINDINGS</label>
+    <input id="flag-input" class="field" style="margin-bottom: 10px;" placeholder="CTF{...}">
+    <button onclick="submitFlag()" class="btn-stamp" style="width: 100%; margin-bottom: 6px;">FILE REPORT</button>
+    <p id="flag-result" class="type-font" style="font-size: 0.85rem; min-height: 1.2em; margin-bottom: 20px;"></p>
+
+    <div style="border-top: 1px dashed var(--line); padding-top: 16px;">
+      <label class="type-font" style="font-size: 0.75rem; color: var(--ink-soft); display:block; margin-bottom:4px;">REQUEST INTEL FROM ANALYST</label>
+      <input id="hint-question" class="field" style="margin-bottom: 10px; font-size: 0.85rem;" placeholder="What should I be looking at?">
+      <button onclick="askHint()" class="btn-outline" style="width: 100%; font-size: 0.85rem;">REQUEST INTEL</button>
+      <p id="hint-result" class="type-font" style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 12px; line-height: 1.5;"></p>
+    </div>
+
+    <button onclick="closeModal()" class="type-font" style="width: 100%; margin-top: 20px; background: none; border: none; color: var(--ink-soft); font-size: 0.8rem; cursor: pointer; text-decoration: underline;">close file</button>
+  </div>
+</div>
+
+<script>
+let currentChallengeId = null;
+
+const threadClass = { crypto: 'thread-crypto', forensics: 'thread-forensics', web: 'thread-web' };
+
+async function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username, password})
+  });
+  const data = await res.json();
+  if (res.ok) {
+    document.getElementById('login-view').classList.add('hidden');
+    document.getElementById('dashboard-view').classList.remove('hidden');
+    document.getElementById('welcome-user').innerText = data.username;
+    loadChallenges();
+    loadLeaderboard();
+  } else {
+    const err = document.getElementById('login-error');
+    err.innerText = 'ACCESS DENIED — ' + (data.error || 'login failed');
+    err.classList.remove('hidden');
+  }
+}
+
+async function logout() {
+  await fetch('/logout', {method: 'POST'});
+  location.reload();
+}
+
+async function loadChallenges() {
+  const res = await fetch('/challenges');
+  const challenges = await res.json();
+  const container = document.getElementById('challenges-list');
+  container.innerHTML = '';
+  challenges.forEach(c => {
+    const div = document.createElement('div');
+    div.className = `paper-card ${threadClass[c.category] || ''} fade-in card-inner-1`;
+    div.onclick = () => openChallenge(c.id);
+    div.innerHTML = `
+      <div class="flex-start-between">
+        <div>
+          <p class="type-font" style="font-size:0.72rem; color: var(--ink-soft); margin:0 0 2px;">FILE NO. ${String(c.id).padStart(3,'0')} — ${c.category.toUpperCase()} / ${c.difficulty.toUpperCase()}</p>
+          <p class="stamp-font" style="font-size:1.4rem; margin:0;">${c.title}</p>
+        </div>
+        <div class="text-right">
+          <p class="stamp-font" style="font-size:1.1rem; margin:0; color: var(--ink);">${c.points} PTS</p>
+          ${c.solved
+            ? '<span class="stamp stamp-solved" style="margin-top:6px; display:inline-block;">SOLVED</span>'
+            : '<span class="stamp stamp-classified" style="margin-top:6px; display:inline-block;">CLASSIFIED</span>'}
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function loadLeaderboard() {
+  const res = await fetch('/leaderboard');
+  const board = await res.json();
+  const container = document.getElementById('leaderboard-list');
+  container.innerHTML = '';
+  if (board.length === 0) {
+    container.innerHTML = '<p class="type-font" style="color: var(--ink-soft); font-size:0.85rem;">No findings filed yet.</p>';
+    return;
+  }
+  board.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.style.padding = '7px 0';
+    row.style.borderBottom = '1px dotted var(--line)';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'center';
+    row.innerHTML = `
+      <span class="type-font" style="font-size:0.9rem;"><span class="stamp-font" style="color: var(--stamp-red); margin-right:6px;">#${i+1}</span>${entry.username}</span>
+      <span class="stamp-font" style="font-size:1rem;">${entry.points}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+async function openChallenge(id) {
+  currentChallengeId = id;
+  const res = await fetch('/challenges/' + id);
+  const c = await res.json();
+  document.getElementById('modal-case-no').innerText = `FILE NO. ${String(c.id).padStart(3,'0')} — ${c.category.toUpperCase()} / ${c.difficulty.toUpperCase()} / ${c.points} PTS`;
+  document.getElementById('modal-title').innerText = c.title;
+  document.getElementById('modal-desc').innerText = c.description;
+  document.getElementById('flag-input').value = '';
+  document.getElementById('flag-result').innerText = '';
+  document.getElementById('hint-question').value = '';
+  document.getElementById('hint-result').innerText = '';
+  document.getElementById('challenge-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('challenge-modal').classList.add('hidden');
+}
+
+async function submitFlag() {
+  const flag = document.getElementById('flag-input').value;
+  const res = await fetch(`/challenges/${currentChallengeId}/submit`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({flag})
+  });
+  const data = await res.json();
+  const resultEl = document.getElementById('flag-result');
+  if (data.correct) {
+    resultEl.innerText = `CONFIRMED — case closed, +${data.points_awarded} pts`;
+    resultEl.style.color = 'var(--stamp-green)';
+    loadChallenges();
+    loadLeaderboard();
+  } else {
+    resultEl.innerText = 'REJECTED — findings do not match';
+    resultEl.style.color = 'var(--stamp-red)';
+  }
+}
+
+async function askHint() {
+  const question = document.getElementById('hint-question').value;
+  const resultEl = document.getElementById('hint-result');
+  resultEl.innerText = 'Analyst reviewing file...';
+  const res = await fetch('/hint', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({challenge_id: currentChallengeId, hint_tier: 1, question})
+  });
+  const data = await res.json();
+  resultEl.innerText = data.hint || data.error;
+}
+</script>
+</body>
+</html>
