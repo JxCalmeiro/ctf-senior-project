@@ -16,6 +16,11 @@ def recycle_bin_download():
     directory = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'challenges', 'recycle-bin-recovery')
     return send_from_directory(directory, 'recycle-bin-artifact.zip', as_attachment=True)
 
+@challenges_bp.route('/static/challenges/network-traffic/download')
+def network_traffic_download():
+    directory = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'challenges', 'network-traffic')
+    return send_from_directory(directory, 'traffic-capture.pcap', as_attachment=True)
+
 @challenges_bp.route('/challenges', methods=['GET'])
 def list_challenges():
     if 'user_id' not in session:
