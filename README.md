@@ -73,9 +73,11 @@ Tested against prompt injection ("ignore previous instructions...") and social-e
 
 ## Notes / Known Limitations
 
-- LDAPS is fully implemented: an Enterprise Root CA runs on the domain controller (AD CS), issuing a certificate the DC uses for LDAPS (port 636). The application container trusts this CA at build time and authenticates over encrypted LDAP exclusively — no credentials ever traverse the network in plaintext.
-- The GitHub webhook is tunneled via Cloudflare Tunnel (`cloudflared`) for local development; a production deployment would use a static public endpoint instead.
-- The Ollama hint bot occasionally exceeds intended tier-1 vagueness (naming a technique earlier than intended) — a known tradeoff of running a smaller local model versus a larger hosted one.
+- **TLS uses a self-signed certificate.** Since this lab has no public domain, browsers will show a certificate warning on first visit to the HTTPS dashboard — expected and documented, not a bug. A production deployment would use a CA-issued cert (e.g. Let's Encrypt) against a real domain name.
+- **The GitHub webhook tunnel (Cloudflare Quick Tunnel) is ephemeral.** It generates a new public URL each time the `cloudflared-tunnel` service restarts, requiring the GitHub webhook's payload URL to be updated manually afterward. A production deployment would use a named Cloudflare Tunnel with a static hostname, or a proper public IP/domain.
+- **The hint bot has no per-user rate limit.** Login attempts are rate-limited and locked out after repeated failures, but the `/hint` endpoint currently has no request throttling — a logged-in user could send hint requests in rapid succession. Adding a cooldown per challenge per user would be a natural next hardening step.
+- **The SQLi practice target runs over plain HTTP on its own port (5001), outside the Nginx/TLS boundary.** This is intentional — it's a deliberately vulnerable training target, isolated from the main authenticated app and not meant to carry real credentials.
+- **The Ollama hint bot occasionally exceeds intended tier-1 vagueness** (naming a technique earlier than intended) — a known tradeoff of running a smaller local model versus a larger hosted one, mitigated by the rate-limited/logged hint request design.
 
 ## Built With
 
