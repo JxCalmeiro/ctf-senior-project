@@ -4,20 +4,24 @@ A self-hosted Capture The Flag platform with Active Directory authentication and
 
 ## Architecture
 
-- **Windows Server 2025** — Active Directory Domain Services (`ctf.local`), provides authentication
+- **Windows Server 2025** — Active Directory Domain Services (`ctf.local`) for authentication, plus Active Directory Certificate Services (Enterprise Root CA) issuing the certificate used for LDAPS
 - **Ubuntu Server 24.04** — hosts the application stack via Docker Compose:
-  - Flask web app (Gunicorn) — challenge platform, flag validation, leaderboard
-  - MySQL 8.0 — application data (users, challenges, solves, hint logs)
+  - Nginx — TLS termination and reverse proxy; the only directly exposed web port
+  - Flask web app (Gunicorn) — challenge platform, flag validation, leaderboard, login lockout
+  - MySQL 8.0 — application data (users, challenges, solves, hint logs, login attempts)
   - Ollama (Llama 3.1 8B) — self-hosted AI hint bot, no external API calls or costs
   - Standalone SQLi challenge container — deliberately vulnerable login for the web category
+  - Cloudflare Tunnel — exposes the GitHub webhook receiver without opening inbound firewall ports
 - **GitHub** — source control with a webhook-triggered auto-deploy pipeline: pushing to `main` automatically pulls and rebuilds the running application
 
 ![Architecture diagram](docs/architecture.png)
 
 ## Features
 
-- **AD-integrated authentication** — users log in with real Active Directory credentials via LDAP bind
-- **6 challenges across 3 categories** — crypto, forensics, web, easy to medium difficulty
+- **AD-integrated authentication over LDAPS** — users log in with real Active Directory credentials via an encrypted LDAP bind (port 636), backed by a certificate issued from an Active Directory Certificate Services Enterprise CA
+- **Account lockout** — 5 failed login attempts locks the account for 10 minutes, with every attempt logged for auditability
+- **HTTPS throughout** — Nginx reverse proxy terminates TLS in front of the Flask app; the app itself is not directly reachable
+- **8 challenges across 3 categories** — crypto, forensics, and web, spanning easy to medium difficulty
 - **AI hint bot** — self-hosted Ollama model gives conceptual nudges without leaking flags, with tiered specificity and prompt-injection resistance
 - **Live leaderboard** — points update in real time as challenges are solved
 - **CI/CD auto-deploy** — GitHub webhook triggers `git pull` + Docker rebuild on every push to `main`
@@ -58,7 +62,9 @@ Copy `.env.example` to `.env` and adjust values (LDAP host, database credentials
 | Caesar Cipher Warmup | Crypto | Easy | 100 |
 | Layers | Crypto | Easy | 100 |
 | Repeating Key | Crypto | Medium | 150 |
+| Small Primes, Bad Idea | Crypto | Medium | 200 |
 | Recycle Bin Recovery | Forensics | Medium | 200 |
+| Intercepted Traffic | Forensics | Easy | 100 |
 | Hidden in Plain Sight | Web | Easy | 100 |
 | Internal Portal | Web | Medium | 150 |
 
@@ -81,8 +87,7 @@ Tested against prompt injection ("ignore previous instructions...") and social-e
 
 ## Built With
 
-Claude Code, Flask, MySQL, Docker, Ollama, VMware Workstation Pro, Windows Server 2025, Ubuntu Server 24.04
-
+Claude Code, Flask, MySQL, Docker, Nginx, Ollama, Cloudflare Tunnel, sympy, scapy, VMware Workstation Pro, Windows Server 2025, Active Directory Certificate Services, Ubuntu Server 24.04
 
 
 
