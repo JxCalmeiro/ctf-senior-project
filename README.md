@@ -12,15 +12,7 @@ A self-hosted Capture The Flag platform with Active Directory authentication and
   - Standalone SQLi challenge container — deliberately vulnerable login for the web category
 - **GitHub** — source control with a webhook-triggered auto-deploy pipeline: pushing to `main` automatically pulls and rebuilds the running application
 
-```Windows Server 2025 (AD DS) <--LDAP--> Ubuntu Server 24.04
-192.168.151.10 192.168.151.20
-├── ctf-web (Flask, :5000)
-├── ctf-db (MySQL)
-├── ollama (:11434)
-├── sqli-challenge (:5001)
-└── webhook receiver (systemd, :9000)
-```
-
+![Architecture diagram](docs/architecture.png)
 
 ## Features
 
