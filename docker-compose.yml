@@ -1,0 +1,25 @@
+services:
+  ctf-web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://ctfuser:ctfpassword@ctf-db/ctfapp
+      - SECRET_KEY=dev-key-change-me
+    depends_on:
+      - ctf-db
+    restart: unless-stopped
+
+  ctf-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=ctfapp
+      - MYSQL_USER=ctfuser
+      - MYSQL_PASSWORD=ctfpassword
+    volumes:
+      - ctf_db_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  ctf_db_data:
