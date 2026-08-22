@@ -1,0 +1,1 @@
+CTF{deleted_but_not_gone}
