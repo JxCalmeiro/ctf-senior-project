@@ -1,6 +1,6 @@
 # CTF Challenge Platform — AI Senior Project
 
-A self-hosted Capture The Flag platform with Active Directory authentication and a locally-run AI hint bot, built for [Course Name] Senior Project.
+A self-hosted Capture The Flag platform with Active Directory authentication and a locally-run AI hint bot, built for NE425  Senior Project.
 
 ## Architecture
 
@@ -94,3 +94,8 @@ Claude Code, Flask, MySQL, Docker, Nginx, Ollama, Cloudflare Tunnel, sympy, scap
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b47ecd894dff10cc809fffebd79c66db0845aa22
