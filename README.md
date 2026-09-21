@@ -89,15 +89,3 @@ Tested against prompt injection ("ignore previous instructions...") and social-e
 
 Claude Code, Flask, MySQL, Docker, Nginx, Ollama, Cloudflare Tunnel, sympy, scapy, VMware Workstation Pro, Windows Server 2025, Active Directory Certificate Services, Ubuntu Server 24.04
 
-
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> b47ecd894dff10cc809fffebd79c66db0845aa22
-NEW NOTE
-NEW NOTE 9/20/26
